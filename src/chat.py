@@ -102,6 +102,12 @@ def apply_chat_template(template, messages, system_message=None, tokenizer:PreTr
             "begin_of_text_len": 1,
             "role_sep_left_offset": -4,
         },
+        "TinyLlama": {
+            "turn_sep": "</s>\n<|user|>\n",
+            "role_sep": "</s>\n<|assistant|>\n",
+            "begin_of_text_len": 0,
+            "role_sep_left_offset": 1,
+        },
     }[template]
 
     role_map = {
@@ -153,6 +159,13 @@ def apply_chat_template(template, messages, system_message=None, tokenizer:PreTr
                 parts = turn.split(role_sep)
 
                 if len(parts) != 2:
+                    system_prompt = conversation_template.system_template.format(
+                        system_message=conversation_template.system_message
+                    )
+                    if parts[0] == system_prompt:
+                        cur_len += turn_len
+                        continue
+
                     break
 
                 user_message, assistant_message = parts
